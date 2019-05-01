@@ -7,7 +7,7 @@ Like Amazon, Bamazon will display an inventory of products and prompt the user t
 
 A user can select an item from a list and then enter a quantity:
 
-![product-purchase(productPurchase.png)
+![product-purchase](productPurchase.png)
 
 If the item is in stock, the user will receive a purchase receipt with a total:
 
