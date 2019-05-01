@@ -14,8 +14,41 @@ connection.connect(function(err) {
     start();
 })
 
-var start = function() {
+function start() {
+    inquirer.prompt({
+        name: "menu",
+        type: "list",
+        choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product"]
+
+    }).then(function(answer) {
+        if (answer.menu === "View Products for Sale") {
+            viewProducts();
+        } else if (answer.menu === "View Low Inventory") {
+            lowInventory();
+        } else if (answer.menu === "Add to Inventory") {
+            addStock(value);
+        } else if (answer === "Add New Product") {
+            //addProduct()
+        }
+    })
+}
+
+function viewProducts() {
     connection.query("SELECT * FROM products", function(err,res){
+        console.log(res);
+        start();
+    })
+}
+
+function lowInventory() {
+    connection.query("SELECT * FROM products WHERE stock_quantity < 6", function(err, res) {
+        console.log(res);
+        start();
+    })
+}
+
+function addStock(value) {
+    connection.query("SELECT * FROM products", function(err,res) {
         console.log(res);
         inquirer.prompt({
             name: "choice",
@@ -27,7 +60,7 @@ var start = function() {
                 }
                 return choiceArray;
             },
-            message: "Which product would you like to purchase?"
+            message: "Which product to add inventory?"
         }).then(function(answer) {
             for (var i = 0; i < res.length; i++) {
                 if (res[i].product_name==answer.choice) {
@@ -35,7 +68,7 @@ var start = function() {
                     inquirer.prompt({
                         name: "amount",
                         type: "input",
-                        message: "How many would you like to buy?",
+                        message: "How much to add?",
                         validate: function(value) {
                             if(isNaN(value)==false) {
                                 return true;
@@ -44,26 +77,21 @@ var start = function() {
                             }
                         }
                     }).then(function(answer) {
-                        var runningAmt = chosenItem.stock_quantity - answer.amount;
-                        var total = chosenItem.price * answer.amount;
-                        if (runningAmt > 0) {
+                        var addedAmt = chosenItem.stock_quantity + answer.amount;
+                        if (addedAmt > 0) {
                             connection.query("UPDATE products SET ? WHERE ?", [{
-                                stock_quantity: runningAmt
+                                stock_quantity: addedAmt
                             },{
                                 product_name: chosenItem.product_name
                             }], function(err,res) {
-                                console.log("Product successfully purchased!")
-                                console.log("Product: " + chosenItem.product_name)
-                                console.log("Total Cost: " + total)
+                                console.log("Inventory Successfully added!")
                                 start();
                             })
-                        } else {
-                            console.log("Insufficient Stock")
-                            start();
                         }
-                    })
+                    }
                 }
             }
         })
     })
 }
+ 
